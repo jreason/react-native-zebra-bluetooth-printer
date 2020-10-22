@@ -374,7 +374,7 @@ public class RNZebraBluetoothPrinterModule extends ReactContextBaseJavaModule im
             promiseMap.put(PROMISE_CONNECT, promise);
             mService.connect(device);
         } else {
-            promise.reject("BT NOT ENABLED");
+            promise.reject("Bluetooth not enabled");
         }
     }
 
@@ -397,72 +397,34 @@ public class RNZebraBluetoothPrinterModule extends ReactContextBaseJavaModule im
         }
     }
 
-//    private byte[] getConfigLabel(ZebraPrinter printer, String label) {
-//        byte[] configLabel = null;
-//        String printLabel = label;
-//        try {
-//            PrinterLanguage printerLanguage = printer.getPrinterControlLanguage();
-//            SGD.SET("device.languages", "zpl", connection);
-//
-//            if (printerLanguage == PrinterLanguage.ZPL) {
-//
-//                configLabel = printLabel.getBytes();
-//
-//            } else if (printerLanguage == PrinterLanguage.CPCL) {
-//                String cpclConfigLabel = "! 0 200 200 406 1\r\n" + "ON-FEED IGNORE\r\n" + "BOX 20 20 380 380 8\r\n"
-//                        + "T 0 6 137 177 TEST\r\n" + "PRINT\r\n";
-//                configLabel = cpclConfigLabel.getBytes();
-//            }
-//        } catch (ConnectionException e) {
-//            Log.d("Connection err", e.toString());
-//            // disconnect();
-//        }
-//        return configLabel;
-//    }
 
     @ReactMethod
     public void print(String device, String label, final Promise promise) {            //print functionality for zebra printer
-        boolean success = false;
-        boolean loading = false;
-//        sleep(500);
         connection = new BluetoothConnection(device);
         try {
-            loading = true;
             connection.open();
         } catch (ConnectionException e) {
             disconnect();
             Log.d("Connection err", e.toString());
-            loading = false;
-            success = false;
-            promise.reject("Unable to establish connection.Please try again!!!");
+            promise.reject("Unable to establish a connection to the printer");
         }
         if (connection.isConnected()) {
             try {
                 Log.d("Connection estd", "here");
 
-//                ZebraPrinter zebraPrinter = ZebraPrinterFactory.getInstance(connection);
-//                PrinterStatus status = zebraPrinter.getCurrentStatus();
-
-//                String pl = SGD.GET("device.languages", connection);
-
-//              byte[] configLabel = getConfigLabel(zebraPrinter, label);
                 byte[] configLabel = label.getBytes();
                 connection.write(configLabel);
                 sleep(500);
-                success = true;
-                loading = false;
-                promise.resolve(success);
+
+                promise.resolve(true);
 
             } catch (Exception err) {
-                success = false;
-                loading = false;
                 Log.d("Connection err", err.toString());
                 promise.reject(err.toString());
             } finally {
                 disconnect();
             }
         }
-
     }
 
     @Override
